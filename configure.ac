@@ -5,8 +5,11 @@ AC_PREREQ(2.59)
 AC_INIT(Stump Window Manager, esyscmd(grep :version stumpwm.asd | cut -d\" -f2 | tr -d \\n), sabetts@gmail.com)
 
 AC_SUBST(CONTRIB_DIR)
+AC_SUBST(BUILDER_PROGRAM)
+AC_SUBST(BUILDER)
 AC_SUBST(LISP_PROGRAM)
 AC_SUBST(LISP)
+AC_SUBST(EXTRA_DEPS)
 AC_SUBST(STUMPWM_ASDF_DIR)
 
 # Checks for programs.
@@ -20,6 +23,11 @@ AC_ARG_WITH(lw,      [  --with-lw=PATH          specify location of lispworks], 
 AC_ARG_WITH(contrib-dir,
                      [  --with-contrib-dir=PATH specify location of contrib modules],
                      CONTRIB_DIR=$withval, CONTRIB_DIR="`pwd`/contrib")
+
+AC_ARG_WITH(buildapp,
+        [AS_HELP_STRING([--with-buildapp], [use buildapp and quicklisp to build a binary])],
+        BUILDER_PROGRAM=$withval,
+        BUILDER_PROGRAM="")
 
 STUMPWM_ASDF_DIR="`pwd`"
 
@@ -94,6 +102,19 @@ if test "x$LISP_PROGRAM" = "x"; then
 fi
 
 AC_MSG_NOTICE([Using $LISP at $LISP_PROGRAM])
+
+if test "$BUILDER_PROGRAM"; then
+   AC_PATH_PROG([BUILDER_PROGRAM], buildapp)
+   if test "x$BUILDER_PROGRAM" = "x"; then
+      AC_MSG_ERROR([buildapp not found])
+   fi
+   BUILDER=buildapp
+   EXTRA_DEPS=quicklisp-manifest.txt
+else
+   BUILDER=$LISP
+   BUILDER_PROGRAM=$LISP_PROGRAM
+   EXTRA_DEPS=""
+fi
 
 # check for makeinfo
 
