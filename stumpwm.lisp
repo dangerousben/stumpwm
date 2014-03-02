@@ -25,6 +25,7 @@
 (export '(cancel-timer
 	  run-with-timer
 	  stumpwm
+	  stumpwm-cli
 	  timer-p))
 
 
@@ -261,9 +262,16 @@ of those expired."
              ;; we need to jump out of the event loop in order to hup
              ;; the process because otherwise we get errors.
              ((eq ret :hup-process)
-                  (apply 'execv (first (argv)) (argv)))
-             ((eq ret :restart))
-             (t 
+              (return-from stumpwm ret))
+              ((eq ret :restart))
+             (t
               (run-hook *quit-hook*)
               ;; the number is the unix return code
               (return-from stumpwm 0))))))
+
+(defun stumpwm-cli (&optional (argv (argv)))
+  "Top-level function to start stumpwm from the CLI"
+  (let ((ret (if (second argv) (stumpwm (second argv)) (stumpwm))))
+    (case ret
+      (:hup-process (apply 'execv (first argv) argv))))
+  (exit-cleanly))

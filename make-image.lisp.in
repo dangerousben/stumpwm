@@ -8,18 +8,15 @@
 (sb-ext:save-lisp-and-die "stumpwm" :toplevel (lambda ()
                                                 ;; asdf requires sbcl_home to be set, so set it to the value when the image was built
                                                 (sb-posix:putenv (format nil "SBCL_HOME=~A" #.(sb-ext:posix-getenv "SBCL_HOME")))
-                                                (stumpwm:stumpwm)
-                                                0)
+                                                (stumpwm:stumpwm-cli))
                           :executable t)
 
 #+clisp
-(ext:saveinitmem "stumpwm" :init-function (lambda ()
-                                            (stumpwm:stumpwm)
-                                            (ext:quit))
+(ext:saveinitmem "stumpwm" :init-function #'stumpwm:stumpwm-cli
                  :executable t :keep-global-handlers t :norc t :documentation "The StumpWM Executable")
 
 #+ccl
-(ccl:save-application "stumpwm" :prepend-kernel t :toplevel-function #'stumpwm:stumpwm)
+(ccl:save-application "stumpwm" :prepend-kernel t :toplevel-function #'stumpwm:stumpwm-cli)
 
 #+ecl
 (asdf:make-build 'stumpwm :type :program :monolithic t
@@ -27,7 +24,7 @@
                  :name-suffix ""
                  :epilogue-code '(progn
                                   (stumpwm:set-contrib-dir "@CONTRIB_DIR@")
-                                  (stumpwm:stumpwm)))
+                                  (stumpwm:stumpwm-cli)))
 
 ;;; if you want to save an image
 #+(and lispworks (not lispworks-personal-edition))
@@ -35,13 +32,11 @@
                 :multiprocessing t
                 :environment nil
                 :load-init-files t
-                :restart-function (compile nil
-                                           #'(lambda ()
-                                               (stumpwm:stumpwm)
-                                               (lw:quit :status 0))))
+                :restart-function #'stumpwm:stumpwm:cli)
+
 ;;; if you want to save a standalone executable
 #+(and nil lispworks (not lispworks-personal-edition))
-(lw:deliver #'stumpwm:stumpwm "stumpwm" 0
+(lw:deliver #'stumpwm:stumpwm-cli "stumpwm" 0
             :interface nil
             :multiprocessing t
             :keep-pretty-printer t)

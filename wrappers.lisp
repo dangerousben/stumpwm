@@ -355,10 +355,11 @@ regarding files in sysfs. Data is read in chunks of BLOCKSIZE bytes."
 	   (return (subseq string 0 string-filled))))))
 
 (defun argv ()
+  #+ecl (loop for i from 0 to (1- (ext:argc)) collect (ext:argv i))
   #+sbcl (copy-list sb-ext:*posix-argv*)
   #+clisp (coerce (ext:argv) 'list)
   #+lispworks (copy-list sys:*line-arguments-list*)
-  #-(or sbcl clisp lispworks)
+  #-(or ecl sbcl clisp lispworks)
   (error "unimplemented"))
 
 (defun execv (program &rest arguments)
@@ -387,5 +388,13 @@ regarding files in sysfs. Data is read in chunks of BLOCKSIZE bytes."
            (coerce arguments 'array))
   #-(or sbcl clisp)
   (error "Unimplemented"))
+
+(defun exit-cleanly ()
+  #+(or ccl ecl sbcl)
+  0
+  #+clisp
+  (ext:quit)
+  #+lispworks
+  (lw:quit :status 0))
 
 ;;; EOF
