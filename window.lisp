@@ -361,7 +361,8 @@ _NET_WM_STATE_DEMANDS_ATTENTION set"
       (if maxmin-notequal
           (update-configuration win)))
     (when (and maxmin-notequal (window-in-current-group-p win))
-      (setf (xlib:window-priority (window-parent win)) :top-if))))
+      (setf (xlib:window-priority (window-parent win)) :top-if)))
+  (move-window-to-head (window-group win) win))
 ;; some handy wrappers
 
 (defun xwin-border-width (win)
@@ -856,7 +857,7 @@ needed."
       (update-decoration last-win))))
 
 (defmethod focus-window (window)
-  "Make the window visible and give it keyboard focus."
+  "Give the specified window keyboard focus."
   (dformat 3 "focus-window: ~s~%" window)
   (let* ((group (window-group window))
          (screen (group-screen group))
@@ -866,28 +867,23 @@ needed."
       ((eq window cw)
        ;; If window to focus is already focused then our work is done.
        )
-      ((and *current-event-time* 
+      ((and *current-event-time*
             (member :WM_TAKE_FOCUS (xlib:wm-protocols xwin) :test #'eq))
-       (raise-window window)
        (let ((hints (xlib:wm-hints xwin)))
          (when (or (null hints) (eq (xlib:wm-hints-input hints) :on))
            (screen-set-focus screen window)
            (update-decoration window)
            (when cw
              (update-decoration cw))))
-       (move-window-to-head group window)
        (send-client-message window :WM_PROTOCOLS
                             (xlib:intern-atom *display* :WM_TAKE_FOCUS)
                             *current-event-time*)
        (run-hook-with-args *focus-window-hook* window cw))
       (t
-       (raise-window window)
        (screen-set-focus screen window)
        (update-decoration window)
        (when cw
          (update-decoration cw))
-       ;; Move the window to the head of the mapped-windows list
-       (move-window-to-head group window)
        (run-hook-with-args *focus-window-hook* window cw)))))
 
 (defun xwin-kill (window)

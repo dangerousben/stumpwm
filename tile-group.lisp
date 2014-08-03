@@ -310,7 +310,9 @@ T (default) then also focus the frame."
       (run-hook-with-args *focus-frame-hook* f last)
       (setf show-indicator t))
     (if w
-        (focus-window w)
+        (progn
+          (raise-window w)
+          (focus-window w))
         (no-focus group (frame-window last)))
     (if show-indicator
         (show-frame-indicator group)

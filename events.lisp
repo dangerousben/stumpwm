@@ -458,6 +458,7 @@ converted to an atom is removed."
   (dformat 2 "client requests to go fullscreen~%")
   (add-wm-state (window-xwin window) :_NET_WM_STATE_FULLSCREEN)
   (setf (window-fullscreen window) t)
+  (raise-window window)
   (focus-window window))
 
 (defun deactivate-fullscreen (window)
