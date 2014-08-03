@@ -862,6 +862,7 @@ needed."
          (screen (group-screen group))
          (cw (screen-focus screen))
          (xwin (window-xwin window)))
+    (move-window-to-head group window)
     (cond
       ((eq window cw)
        ;; If window to focus is already focused then our work is done.
@@ -875,7 +876,6 @@ needed."
            (update-decoration window)
            (when cw
              (update-decoration cw))))
-       (move-window-to-head group window)
        (send-client-message window :WM_PROTOCOLS
                             (xlib:intern-atom *display* :WM_TAKE_FOCUS)
                             *current-event-time*)
@@ -886,8 +886,6 @@ needed."
        (update-decoration window)
        (when cw
          (update-decoration cw))
-       ;; Move the window to the head of the mapped-windows list
-       (move-window-to-head group window)
        (run-hook-with-args *focus-window-hook* window cw)))))
 
 (defun xwin-kill (window)
