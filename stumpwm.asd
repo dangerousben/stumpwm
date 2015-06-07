@@ -57,5 +57,6 @@
                (:file "wse")
                ;; keep this last so it always gets recompiled if
                ;; anything changes
-               (:file "version")))
-
+               (:file "version"))
+  :build-operation asdf:program-op
+  :entry-point #-clisp "stumpwm:stumpwm" #+clisp "(lambda () (stumpwm:stumpwm) (ext:quit))")
